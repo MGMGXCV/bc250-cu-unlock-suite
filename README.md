@@ -45,7 +45,7 @@ workflow.
 This is the path used for the initial end-to-end hardware validation of the suite.
 
 ```bash
-git clone <your-github-url>/bc250-cu-unlock-suite.git
+git clone https://github.com/MGMGXCV/bc250-cu-unlock-suite.git
 cd bc250-cu-unlock-suite
 
 ./setup.sh --os cachyos
@@ -59,7 +59,7 @@ routing method itself is the same, but SteamOS has an atomic/read-only host imag
 so dependency installation and update recovery are handled differently.
 
 ```bash
-git clone <your-github-url>/bc250-cu-unlock-suite.git
+git clone https://github.com/MGMGXCV/bc250-cu-unlock-suite.git
 cd bc250-cu-unlock-suite
 
 ./setup.sh --os steamos

@@ -51,8 +51,7 @@ https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-f
 Upstream/project home referenced by UMR documentation:
 https://gitlab.freedesktop.org/tomstdenis/umr
 
-UMR provides userspace AMDGPU register inspection/write facilities. BC-250 WGP
-The suite does not implement register access itself; the live-manager uses UMR.
+UMR provides userspace AMDGPU register inspection/write facilities. BC-250 CU Unlock Suite does not implement register access itself; the live-manager uses UMR.
 
 ## Community documentation
 
