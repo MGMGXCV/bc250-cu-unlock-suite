@@ -1,0 +1,45 @@
+name: BC-250 hardware result
+about: Share a board-specific WGP validation result
+labels: [hardware-result]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for sharing data. **Never recommend that another user copies your WGP profile.** Each BC-250 must be tested independently.
+  - type: input
+    id: version
+    attributes:
+      label: BC-250 CU Unlock Suite version
+      placeholder: 0.3.2
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - CachyOS
+        - Arch Linux
+        - SteamOS
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Sanitized `bc250-unlock report`
+      description: Paste the generated Markdown report or attach it. Remove anything you do not want public.
+    validations:
+      required: true
+  - type: textarea
+    id: realworkload
+    attributes:
+      label: Real-workload validation
+      description: Games/apps tested, approximate duration, artifacts/hangs, and max temperature if known.
+  - type: checkboxes
+    id: understanding
+    attributes:
+      label: Board-specific result
+      options:
+        - label: I understand this WGP profile is specific to this physical board and should not be copied to another BC-250.
+          required: true

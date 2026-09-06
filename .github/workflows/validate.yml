@@ -1,0 +1,85 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bash syntax
+        run: bash -n bc250-unlock bc250-lab setup.sh scripts/*.sh
+      - name: Python syntax
+        run: python3 -m py_compile scripts/bc250-graphics-verify.py gui/bc250_gui.py
+      - name: GUI self-test
+        run: python3 gui/bc250_gui.py --self-test
+      - name: JavaScript syntax
+        run: node --check gui/app.js
+      - name: GUI readability / attribution smoke test
+        run: |
+          grep -q '^\.persistence-locked { opacity: 1; }' gui/style.css
+          if grep -q '^\.persistence-locked { opacity: \.68; }' gui/style.css; then exit 1; fi
+          grep -q 'GPT-5.6 Sol' ACKNOWLEDGEMENTS.md
+          test -s SAFETY.md
+          test -s docs/REFERENCES.md
+          test -s docs/LICENSING.md
+          grep -q 'BC-250 CU Unlock Suite' README.md
+          grep -q 'BC-250 CU UNLOCK SUITE' gui/index.html
+          test -x bc250-unlock
+          test -x bc250-lab
+      - name: GUI persistence-lock smoke test
+        run: |
+          python3 - <<'PYTEST'
+          import importlib.util
+          from pathlib import Path
+          p = Path("gui/bc250_gui.py")
+          spec = importlib.util.spec_from_file_location("bcgui", p)
+          m = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(m)
+          m.service_enabled = lambda: True
+          for action in ("wizard", "doctor", "baseline", "scan", "visual", "apply", "soak30", "persist_install"):
+              assert m.action_block_reason(action) == "persistence_active", action
+          for action in ("status", "results", "report", "persist_status", "persist_remove"):
+              assert m.action_block_reason(action) is None, action
+          PYTEST
+      - name: Platform override smoke tests
+        run: |
+          BC250_PLATFORM=cachyos bash -c 'source scripts/bc250-platform.sh; test "$(bc250_detect_platform)" = cachyos'
+          BC250_PLATFORM=steamos bash -c 'source scripts/bc250-platform.sh; test "$(bc250_detect_platform)" = steamos'
+          BC250_PLATFORM=steamos bash -c 'source scripts/bc250-common.sh; test "$STATE_DIR" = /home/.steamos/offload/var/lib/bc250-wgp-lab'
+      - name: Approved-set parser smoke test
+        run: |
+          tmp="$(mktemp -d)"
+          cat > "$tmp/gpu-boot-wgp-map.tsv" <<'MAP'
+          factory	0.0.0
+          factory	0.0.1
+          factory	0.0.2
+          factory	0.1.0
+          factory	0.1.1
+          factory	0.1.2
+          factory	1.0.0
+          factory	1.0.1
+          factory	1.0.2
+          factory	1.1.0
+          factory	1.1.2
+          factory	1.1.3
+          candidate	0.0.3
+          candidate	0.0.4
+          candidate	0.1.3
+          candidate	0.1.4
+          candidate	1.0.3
+          candidate	1.0.4
+          candidate	1.1.1
+          candidate	1.1.4
+          MAP
+          printf '2026-09-05T00:00:00Z\tboot\t0.0.3\tPASS\tok\n2026-09-05T00:00:00Z\tboot\t0.0.4\tPASS\tok\n2026-09-05T00:00:00Z\tboot\t0.1.3\tPASS\tok\n2026-09-05T00:00:00Z\tboot\t0.1.4\tPASS\tok\n2026-09-05T00:00:00Z\tboot\t1.0.3\tPASS\tok\n2026-09-05T00:00:00Z\tboot\t1.0.4\tPASS\tok\n2026-09-05T00:00:00Z\tboot\t1.1.1\tFAIL_VERIFY\tbad\n2026-09-05T00:00:00Z\tboot\t1.1.4\tPASS\tok\n' > "$tmp/gpu-results.tsv"
+          printf '2026-09-05T00:00:00Z\tboot\t0.0.3\tPASS_VISUAL\tclean\n2026-09-05T00:00:00Z\tboot\t0.0.4\tPASS_VISUAL\tclean\n2026-09-05T00:00:00Z\tboot\t1.0.3\tPASS_VISUAL\tclean\n2026-09-05T00:00:00Z\tboot\t1.0.4\tPASS_VISUAL\tclean\n2026-09-05T00:00:00Z\tboot\t1.1.4\tPASS_VISUAL\tclean\n' > "$tmp/gpu-visual-results.tsv"
+          printf '0.1.3\t2026-09-05T00:00:00Z\tblue squares\n0.1.4\t2026-09-05T00:00:00Z\tblue squares\n' > "$tmp/gpu-manual-bad.tsv"
+          BC250_STATE_DIR="$tmp" BC250_PLATFORM=cachyos bash -c 'source scripts/bc250-common.sh; test "$(approved_wgps | paste -sd" " -)" = "0.0.3 0.0.4 1.0.3 1.0.4 1.1.4"; test "$(expected_cus)" = 34'
+      - name: ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          shellcheck -x bc250-unlock bc250-lab setup.sh scripts/*.sh || true

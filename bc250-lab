@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Backward-compatible alias retained from BC-250 WGP Lab <= v0.3.x.
+set -Eeuo pipefail
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+echo '[bc250-lab] Compatibility alias: forwarding to ./bc250-unlock' >&2
+exec "$ROOT/bc250-unlock" "$@"

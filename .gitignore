@@ -1,0 +1,14 @@
+# Runtime / fetched dependencies
+upstream/
+*.log
+*.tmp
+__pycache__/
+*.pyc
+
+# Local reports
+reports/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store

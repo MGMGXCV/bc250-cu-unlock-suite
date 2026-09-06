@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+GPU="$ROOT/scripts/bc250-gpu-probe.sh"
+GFX="$ROOT/scripts/bc250-gfx-probe.sh"
+CPU="$ROOT/scripts/bc250-cpu-health.sh"
+PERSIST="$ROOT/scripts/bc250-persist.sh"
+SOAK="$ROOT/scripts/bc250-soak.sh"
+REPORT="$ROOT/scripts/bc250-report.sh"
+STATUS="$ROOT/scripts/bc250-status.sh"
+STEAMOS="$ROOT/scripts/bc250-steamos.sh"
+GUI="$ROOT/gui/bc250_gui.py"
+GUI_SHORTCUT="$ROOT/scripts/bc250-gui-shortcut.sh"
+source "$ROOT/scripts/bc250-platform.sh"
+
+usage(){ cat <<'USAGE'
+BC-250 CU Unlock Suite
+
+Quick start:
+  ./setup.sh
+  sudo ./bc250-unlock wizard
+
+Commands:
+  setup                 Choose/install CachyOS or SteamOS dependencies + upstream tools
+  platform              Show detected platform
+  doctor                Hardware/dependency/topology preflight
+  wizard                Guided safe discovery workflow
+  baseline              Verify stock 24-CU correctness
+  scan                   Automated per-WGP compute scan
+  visual                 Human real-desktop visual scan
+  results                Show compute + visual results (sudo; state is root-private)
+  status                 Show current live routing/dashboard
+  apply                  Apply only compute+visual approved WGPs live
+  stock                  Restore factory boot-driver routing live
+  recover                Recover/record a pending interrupted or hung test
+  soak [MINUTES]         Long compute soak of approved combined set (default 20)
+  report [FILE.md]       Generate a privacy-conscious Markdown report
+  persist status         Show saved/active boot restore state
+  persist install        Save approved combined table + enable boot restore
+  persist remove         Remove boot restore + restore stock live
+  persist reapply        Apply the saved boot table immediately
+  steamos verify         SteamOS post-update health check
+  steamos repair         Repair SteamOS host dependencies/service after update
+  gui [--no-browser]     Optional bilingual graphical guide (run WITHOUT sudo)
+  gui-shortcut install   Add the graphical guide to your desktop application menu
+
+Experimental/optional:
+  gfx baseline|scan|test WGP   Offscreen graphics readback verifier
+  cpu status|unlock|quick|deep CPU-core research helper
+
+Safety: persistence is board-specific. Never copy another board's WGP profile.
+USAGE
+}
+need_root(){ [ "${EUID:-$(id -u)}" -eq 0 ] || { echo '[bc250-unlock] ERROR: run with sudo' >&2; exit 1; }; }
+
+wizard(){
+  need_root
+  echo '=== BC-250 CU Unlock Suite guided workflow ==='
+  echo 'This workflow keeps changes live-only until you explicitly run persist install.'
+  echo
+  bash "$GPU" preflight
+  printf '\nContinue with stock 24-CU baseline? [Y/n]: ' >/dev/tty; read -r a </dev/tty || a=n
+  case "${a,,}" in n|no) return 0;; esac
+  bash "$GPU" baseline
+  printf '\nRun the automated per-WGP compute scan? Save your work first. [y/N]: ' >/dev/tty; read -r a </dev/tty || a=n
+  case "${a,,}" in y|yes|s|si|sí) bash "$GPU" scan;; *) return 0;; esac
+  bash "$GPU" summary
+  printf '\nRun the real-desktop visual scan for compute-PASS WGPs? [y/N]: ' >/dev/tty; read -r a </dev/tty || a=n
+  case "${a,,}" in y|yes|s|si|sí) bash "$GPU" visual-scan;; *) return 0;; esac
+  bash "$GPU" summary
+  printf '\nApply the WGPs that passed BOTH compute and visual validation? [y/N]: ' >/dev/tty; read -r a </dev/tty || a=n
+  case "${a,,}" in y|yes|s|si|sí) bash "$GPU" apply-passed;; *) return 0;; esac
+  echo
+  echo 'Combined set is live-only. Test games/workloads before enabling persistence.'
+  echo 'Later: sudo ./bc250-unlock soak 30'
+  echo 'Then : sudo ./bc250-unlock persist install'
+}
+
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  setup) exec bash "$ROOT/setup.sh" "$@" ;;
+  platform) printf '%s\n' "$(bc250_platform_label)" ;;
+  doctor|preflight) need_root; exec bash "$GPU" preflight "$@" ;;
+  wizard) wizard ;;
+  baseline) need_root; exec bash "$GPU" baseline "$@" ;;
+  scan) need_root; exec bash "$GPU" scan "$@" ;;
+  visual|visual-scan) need_root; exec bash "$GPU" visual-scan "$@" ;;
+  results|summary) need_root; exec bash "$GPU" summary "$@" ;;
+  status) need_root; exec bash "$STATUS" "$@" ;;
+  apply) need_root; exec bash "$GPU" apply-passed "$@" ;;
+  stock) need_root; exec bash "$GPU" stock "$@" ;;
+  recover) need_root; exec bash "$GPU" recover "$@" ;;
+  soak) need_root; exec bash "$SOAK" "${1:-20}" ;;
+  report) need_root; exec bash "$REPORT" "${1:-$ROOT/reports/bc250-unlock-report-$(date +%Y%m%d-%H%M%S).md}" ;;
+  persist) need_root; exec bash "$PERSIST" "${1:-status}" ;;
+  steamos) need_root; exec bash "$STEAMOS" "${1:-verify}" ;;
+  gui) exec python3 "$GUI" "$@" ;;
+  gui-shortcut) exec bash "$GUI_SHORTCUT" "${1:-status}" ;;
+  gfx) need_root; exec bash "$GFX" "$@" ;;
+  cpu) need_root; exec bash "$CPU" "$@" ;;
+  help|-h|--help|"") usage ;;
+  *) usage >&2; echo "[bc250-unlock] ERROR: unknown command: $cmd" >&2; exit 1 ;;
+esac

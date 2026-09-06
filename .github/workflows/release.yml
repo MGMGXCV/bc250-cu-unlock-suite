@@ -1,0 +1,52 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate tag/version
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(tr -d '[:space:]' < VERSION)"
+          test "$tag" = "$version" || { echo "Tag v$tag != VERSION $version" >&2; exit 1; }
+      - name: Run release checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n bc250-unlock bc250-lab setup.sh scripts/*.sh
+          python3 -m py_compile scripts/bc250-graphics-verify.py gui/bc250_gui.py
+          python3 gui/bc250_gui.py --self-test
+          node --check gui/app.js
+      - name: Build source archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < VERSION)"
+          root="bc250-cu-unlock-suite-v${version}"
+          staging="$(mktemp -d)"
+          mkdir -p "$staging/$root"
+          rsync -a --exclude='.git' --exclude='upstream' --exclude='reports' ./ "$staging/$root/"
+          find "$staging/$root" -type d -name '__pycache__' -prune -exec rm -rf {} +
+          find "$staging/$root" -name '*.pyc' -delete
+          tar -C "$staging" -czf "${root}.tar.gz" "$root"
+          (cd "$staging" && zip -qr "$GITHUB_WORKSPACE/${root}.zip" "$root")
+          sha256sum "${root}.tar.gz" "${root}.zip" > RELEASE-CHECKSUMS.sha256
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
+          files: |
+            bc250-cu-unlock-suite-v*.tar.gz
+            bc250-cu-unlock-suite-v*.zip
+            RELEASE-CHECKSUMS.sha256

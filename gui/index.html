@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>BC-250 CU Unlock Suite</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <script>window.BC250_TOKEN="__BC250_TOKEN__";</script>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">BC-250 CU UNLOCK SUITE</div>
+        <h1 data-i18n="title">Graphical mode</h1>
+        <p class="subtitle" data-i18n="subtitle">Beginner-friendly guide. Every hardware action still runs in the original CLI inside a visible terminal.</p>
+      </div>
+      <div class="header-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button id="lang-es" class="chip">ES</button>
+          <button id="lang-en" class="chip">EN</button>
+        </div>
+        <button id="refresh" class="button secondary" data-i18n="refresh">Refresh</button>
+      </div>
+    </header>
+
+    <section class="status-grid" aria-label="Status">
+      <article class="status-card">
+        <span data-i18n="platform">Platform</span>
+        <strong id="platform-value">…</strong>
+      </article>
+      <article class="status-card">
+        <span data-i18n="setupStatus">Setup</span>
+        <strong id="setup-value">…</strong>
+      </article>
+      <article class="status-card">
+        <span data-i18n="liveCUs">Live CUs</span>
+        <strong id="cus-value">—</strong>
+      </article>
+      <article class="status-card">
+        <span data-i18n="persistence">Boot persistence</span>
+        <strong id="persist-value">…</strong>
+      </article>
+    </section>
+
+    <section id="persistent-mode-notice" class="notice success" hidden>
+      <div class="notice-icon">✓</div>
+      <div>
+        <strong data-i18n="configuredTitle">Persistent profile active — protected mode</strong>
+        <p data-i18n="configuredBody">Your saved WGP profile is already restored at boot. Diagnostic tests are disabled to avoid mixing live probing with boot persistence. Status, results, reports and persistence management remain available.</p>
+      </div>
+    </section>
+
+    <section class="notice warning">
+      <div class="notice-icon">!</div>
+      <div>
+        <strong data-i18n="safetyTitle">Save your work before testing</strong>
+        <p data-i18n="safetyBody">Hidden WGPs can be physically defective. A test may freeze the GPU or the whole PC. Never copy another board's WGP profile.</p>
+      </div>
+    </section>
+
+    <section class="hero-card">
+      <div>
+        <span class="pill" data-i18n="recommended">Recommended</span>
+        <h2 data-i18n="wizardTitle">First-time guided assistant</h2>
+        <p data-i18n="wizardBody">The CLI wizard checks stock, tests every hidden WGP, asks you to inspect the real desktop for artifacts, and applies only the approved set live. It never enables boot persistence by itself.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="button primary action" data-action="wizard" data-risk="write" data-i18n="startWizard">Start guided assistant</button>
+        <button class="button secondary action" data-action="setup" data-i18n="runSetup">Run setup</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow" data-i18n="beginnerFlow">BEGINNER FLOW</div>
+          <h2 data-i18n="stepByStep">Step by step</h2>
+        </div>
+        <p data-i18n="stepHint">Run these in order if you prefer to understand each stage instead of using the full wizard.</p>
+      </div>
+      <div class="steps" id="steps">
+        <article class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3 data-i18n="doctorTitle">Hardware check</h3>
+            <p data-i18n="doctorBody">Detects your BC-250, dependencies and the board's real factory WGP map. It does not unlock hidden WGPs.</p>
+            <code>sudo ./bc250-unlock doctor</code>
+          </div>
+          <button class="button action" data-action="doctor" data-i18n="run">Run</button>
+        </article>
+        <article class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3 data-i18n="baselineTitle">Stock baseline</h3>
+            <p data-i18n="baselineBody">Verifies that the factory 24-CU configuration is correct before testing anything hidden.</p>
+            <code>sudo ./bc250-unlock baseline</code>
+          </div>
+          <button class="button action" data-action="baseline" data-risk="write" data-i18n="run">Run</button>
+        </article>
+        <article class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3 data-i18n="scanTitle">Compute scan</h3>
+            <p data-i18n="scanBody">Tests each disabled 2-CU WGP independently and restores stock between candidates.</p>
+            <code>sudo ./bc250-unlock scan</code>
+          </div>
+          <button class="button action" data-action="scan" data-risk="write" data-i18n="run">Run</button>
+        </article>
+        <article class="step-card">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3 data-i18n="visualTitle">Visual desktop check</h3>
+            <p data-i18n="visualBody">Activates one compute-PASS WGP at a time while you move the mouse, open menus and move windows. You tell the tool if you saw artifacts.</p>
+            <code>sudo ./bc250-unlock visual</code>
+          </div>
+          <button class="button action" data-action="visual" data-risk="write" data-i18n="run">Run</button>
+        </article>
+        <article class="step-card">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h3 data-i18n="resultsTitle">Review results</h3>
+            <p data-i18n="resultsBody">Shows which WGPs passed compute, passed visual validation, or were rejected.</p>
+            <code>sudo ./bc250-unlock results</code>
+          </div>
+          <button class="button action" data-action="results" data-i18n="run">Run</button>
+        </article>
+        <article class="step-card">
+          <div class="step-number">6</div>
+          <div class="step-content">
+            <h3 data-i18n="applyTitle">Combined validation</h3>
+            <p data-i18n="applyBody">Enables only WGPs that passed both gates, runs a heavier verifier and asks for one final visual check.</p>
+            <code>sudo ./bc250-unlock apply</code>
+          </div>
+          <button class="button action" data-action="apply" data-risk="write" data-i18n="run">Run</button>
+        </article>
+        <article class="step-card">
+          <div class="step-number">7</div>
+          <div class="step-content">
+            <h3 data-i18n="soakTitle">30-minute stability test</h3>
+            <p data-i18n="soakBody">Longer combined compute test with temperature and kernel-fault monitoring. Use real games too before persistence.</p>
+            <code>sudo ./bc250-unlock soak 30</code>
+          </div>
+          <button class="button action" data-action="soak30" data-risk="write" data-i18n="run30">Run 30 min</button>
+        </article>
+        <article class="step-card final-step">
+          <div class="step-number">8</div>
+          <div class="step-content">
+            <h3 data-i18n="persistTitle">Optional boot persistence</h3>
+            <p data-i18n="persistBody">Only after games and soak tests are clean. Saves this board's approved routing and restores it at boot. BIOS/firmware are not modified.</p>
+            <code>sudo ./bc250-unlock persist install</code>
+          </div>
+          <button class="button danger action" data-action="persist_install" data-risk="persist" data-i18n="installPersistence">Install persistence</button>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-heading compact">
+        <div>
+          <div class="eyebrow" data-i18n="tools">TOOLS</div>
+          <h2 data-i18n="maintenance">Status, recovery and maintenance</h2>
+        </div>
+      </div>
+      <div class="tool-grid">
+        <button class="tool-card action" data-action="status"><strong data-i18n="statusTitle">Live status</strong><span data-i18n="statusBody">Current routing, temperature and persistence state.</span></button>
+        <button class="tool-card action" data-action="report"><strong data-i18n="reportTitle">Create report</strong><span data-i18n="reportBody">Generate a privacy-conscious Markdown report for GitHub/issues.</span></button>
+        <button class="tool-card action" data-action="recover" data-risk="write"><strong data-i18n="recoverTitle">Recover interrupted test</strong><span data-i18n="recoverBody">Use after a reboot/hang before continuing a scan.</span></button>
+        <button class="tool-card action" data-action="stock" data-risk="write"><strong data-i18n="stockTitle">Return to stock live</strong><span data-i18n="stockBody">Restore the factory boot-driver routing now.</span></button>
+        <button class="tool-card action" data-action="persist_status"><strong data-i18n="persistStatusTitle">Persistence status</strong><span data-i18n="persistStatusBody">Show the saved boot profile and service state.</span></button>
+        <button class="tool-card action danger-outline" data-action="persist_remove" data-risk="persist"><strong data-i18n="persistRemoveTitle">Remove persistence</strong><span data-i18n="persistRemoveBody">Disable boot restore and return to stock routing.</span></button>
+      </div>
+    </section>
+
+    <section id="steamos-section" class="platform-section">
+      <div class="section-heading compact">
+        <div>
+          <div class="eyebrow">STEAMOS</div>
+          <h2 data-i18n="steamTitle">SteamOS update tools</h2>
+        </div>
+        <p data-i18n="steamBody">SteamOS support is experimental. Run Verify after every OS update; Repair only if Verify reports missing components.</p>
+      </div>
+      <div class="inline-actions">
+        <button class="button action" data-action="steamos_verify" data-i18n="verify">Verify</button>
+        <button class="button secondary action" data-action="steamos_repair" data-risk="write" data-i18n="repair">Repair</button>
+      </div>
+    </section>
+
+    <section class="notice info">
+      <div class="notice-icon">i</div>
+      <div>
+        <strong data-i18n="transparentTitle">Transparent by design</strong>
+        <p data-i18n="transparentBody">This graphical mode never writes GPU registers directly. Buttons only launch whitelisted BC-250 CU Unlock Suite CLI commands in a visible terminal. If the GUI disappears, the CLI remains fully usable.</p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-copy">
+        <span id="version">BC-250 CU Unlock Suite</span>
+        <span class="footer-note" data-i18n="footerNotice">Experimental hardware tool — use responsibly and keep a recovery path. Developed with assistance from OpenAI ChatGPT (GPT-5.6 Sol); hardware decisions and validation remain the user's responsibility.</span>
+      </div>
+      <button id="stop" class="link-button" data-i18n="closeGui">Stop graphical mode</button>
+    </footer>
+  </main>
+
+  <dialog id="confirm-dialog">
+    <form method="dialog">
+      <div class="dialog-head">
+        <span class="dialog-badge">!</span>
+        <div>
+          <h3 id="confirm-title">Confirm</h3>
+          <p id="confirm-text"></p>
+        </div>
+      </div>
+      <div class="command-box" id="confirm-command"></div>
+      <div class="dialog-actions">
+        <button value="cancel" class="button secondary" data-i18n="cancel">Cancel</button>
+        <button value="confirm" class="button danger" data-i18n="continue">Continue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
