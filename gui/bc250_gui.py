@@ -34,6 +34,7 @@ UPSTREAM_MANAGER = ROOT / "upstream" / "bc250-cu-live-manager" / "bc250-cu-live-
 UPSTREAM_VERIFY = ROOT / "upstream" / "bc250-40cu-unlock" / "scripts" / "bc250-compute-verify.sh"
 SERVICE = "bc250-cu-live-manager.service"
 CPU_REARM_SERVICE = "bc250-cpu-rearm.service"
+SERVICE_CONF = Path("/etc/bc250-cu-live-manager.conf")
 
 # When boot persistence is enabled, probing commands intentionally refuse to run.
 # Mirror that safety rule in the GUI so beginners are not led into expected errors.
@@ -235,6 +236,35 @@ def sudo_cached_live_cus() -> int | None:
     return int(matches[-1]) if matches else None
 
 
+def persistent_profile_cus() -> int | None:
+    """Return the saved boot-profile CU count without privileged UMR access."""
+    try:
+        lines = SERVICE_CONF.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+
+    for line in lines:
+        if not line.startswith("BC250_WGP_MASKS="):
+            continue
+        raw = line.split("=", 1)[1].strip()
+        parts = [part.strip() for part in raw.split(",") if part.strip()]
+        if len(parts) != 4:
+            return None
+        try:
+            masks = [int(part, 0) & 0x1f for part in parts]
+        except ValueError:
+            return None
+        return sum(bin(mask).count("1") * 2 for mask in masks)
+    return None
+
+
+def service_active() -> bool | None:
+    if not shutil.which("systemctl"):
+        return None
+    rc, _ = run_capture(["systemctl", "is-active", "--quiet", SERVICE], timeout=2.0)
+    return rc == 0
+
+
 def service_enabled() -> bool | None:
     if not shutil.which("systemctl"):
         return None
@@ -280,12 +310,16 @@ def action_block_reason(action_id: str) -> str | None:
 def info_payload() -> dict[str, Any]:
     term_name, _ = detect_terminal()
     persisted = service_enabled()
+    active = service_active()
+    live_cus = sudo_cached_live_cus()
+    if live_cus is None and persisted is True and active is True:
+        live_cus = persistent_profile_cus()
     return {
         "version": read_version(),
         "platform": platform_label(),
         "setupReady": UPSTREAM_MANAGER.is_file() and os.access(UPSTREAM_MANAGER, os.X_OK) and UPSTREAM_VERIFY.is_file() and os.access(UPSTREAM_VERIFY, os.X_OK),
         "terminal": term_name,
-        "liveCUs": sudo_cached_live_cus(),
+        "liveCUs": live_cus,
         "serviceEnabled": persisted,
         "cpuThreads": cpu_present_threads(),
         "cpuRearmEnabled": cpu_rearm_enabled(),
