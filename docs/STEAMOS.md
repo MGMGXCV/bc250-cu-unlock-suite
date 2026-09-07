@@ -49,7 +49,7 @@ The persistent boot profile does not intentionally depend on `/usr/bin/umr`: `pe
 From Desktop Mode:
 
 ```bash
-git clone <your-github-url>/bc250-cu-unlock-suite.git
+git clone https://github.com/MGMGXCV/bc250-cu-unlock-suite.git
 cd bc250-cu-unlock-suite
 ./setup.sh --os steamos
 sudo ./bc250-unlock doctor
@@ -145,6 +145,18 @@ sudo ./bc250-unlock steamos keep-status
 On images that provide `holo-sync-var`, the command also shows matching dry-run
 information when available.
 
+## CPU unlock / re-arm on SteamOS
+
+The v0.5.0 CPU CLI is available on SteamOS through the same separately fetched
+live-manager, but **CPU re-arm on SteamOS remains experimental** until validated
+on real SteamOS BC-250 hardware.
+
+When advanced CPU re-arm is enabled, the suite places a local runtime copy of the
+live-manager under `/opt/bc250-wgp-lab/bin/bc250-cpu-rearm-manager` and uses a
+separate `/etc/atomic-update.conf.d/bc250-cpu-rearm.conf` keep list for its
+systemd integration. It still never reboots automatically; after a cold boot a
+user-initiated warm reboot is required before 8c/16t becomes active.
+
 ## Known limitations
 
 - SteamOS images/channels change more quickly than CachyOS/Arch package layouts.
@@ -152,8 +164,9 @@ information when available.
 - The keep list protects the CU service/config integration; it does not guarantee
   that a future kernel, Mesa or UMR build behaves identically.
 - This project does not install BC-250 ACPI fixes, governor tuning, patched Mesa,
-  audio fixes or CPU unlocks on SteamOS. It only provides the WGP discovery and
-  validated CU persistence workflow. Those are deliberately separate concerns.
+  or audio fixes on SteamOS. CPU unlock/re-arm is separate from the GPU workflow
+  and remains experimental on SteamOS even though the CachyOS CPU path has been
+  validated on the reference board.
 - Bazzite is not currently the same path; it uses rpm-ostree and should get its
   own installer rather than being treated as SteamOS.
 

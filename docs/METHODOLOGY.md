@@ -73,3 +73,14 @@ operation should have meaningful thermal margin below it.
 A monitor-visible artifact is treated as stronger evidence than a synthetic
 PASS. Internal CRC/readback approaches do not necessarily observe every stage of
 the physical display path, so the final desktop gate remains human-reviewed.
+
+## CPU methodology is separate
+
+The CPU 6c/12t -> 8c/16t workflow is intentionally not part of GPU WGP discovery.
+The suite first verifies that 16 threads enumerate after the volatile unlock, then
+loads physical cores 3 and 7 independently before an all-thread stage. Automatic
+CPU re-arm is gated on one complete `cpu deep` PASS and remains OFF by default.
+
+CPU re-arm does not change the recovery model into automatic rebooting. After a
+cold boot it only re-arms the mask; the operator decides whether and when to do a
+warm reboot. See [CPU.md](CPU.md).

@@ -41,7 +41,9 @@ jobs:
           m.service_enabled = lambda: True
           for action in ("wizard", "doctor", "baseline", "scan", "visual", "apply", "soak30", "persist_install"):
               assert m.action_block_reason(action) == "persistence_active", action
-          for action in ("status", "results", "report", "persist_status", "persist_remove"):
+          for action in ("status", "results", "report", "persist_status", "persist_remove",
+                         "cpu_status", "cpu_unlock", "cpu_quick", "cpu_deep",
+                         "cpu_rearm_status", "cpu_rearm_enable", "cpu_rearm_disable"):
               assert m.action_block_reason(action) is None, action
           PYTEST
       - name: Platform override smoke tests
@@ -78,6 +80,19 @@ jobs:
           printf '2026-09-05T00:00:00Z\tboot\t0.0.3\tPASS_VISUAL\tclean\n2026-09-05T00:00:00Z\tboot\t0.0.4\tPASS_VISUAL\tclean\n2026-09-05T00:00:00Z\tboot\t1.0.3\tPASS_VISUAL\tclean\n2026-09-05T00:00:00Z\tboot\t1.0.4\tPASS_VISUAL\tclean\n2026-09-05T00:00:00Z\tboot\t1.1.4\tPASS_VISUAL\tclean\n' > "$tmp/gpu-visual-results.tsv"
           printf '0.1.3\t2026-09-05T00:00:00Z\tblue squares\n0.1.4\t2026-09-05T00:00:00Z\tblue squares\n' > "$tmp/gpu-manual-bad.tsv"
           BC250_STATE_DIR="$tmp" BC250_PLATFORM=cachyos bash -c 'source scripts/bc250-common.sh; test "$(approved_wgps | paste -sd" " -)" = "0.0.3 0.0.4 1.0.3 1.0.4 1.1.4"; test "$(expected_cus)" = 34'
+      - name: CPU deep-gate / re-arm smoke test
+        run: |
+          tmp="$(mktemp -d)"
+          mkdir -p "$tmp/state"
+          cat > "$tmp/state/cpu-results.tsv" <<'CPU'
+          2026-09-06T13:23:08+02:00	core3	PASS	ok	/tmp/logs/cpu-deep-test.log
+          2026-09-06T13:28:08+02:00	core7	PASS	ok	/tmp/logs/cpu-deep-test.log
+          2026-09-06T13:38:08+02:00	ALL	PASS	ok	/tmp/logs/cpu-deep-test.log
+          CPU
+          out="$(sudo env BC250_PLATFORM=cachyos BC250_STATE_DIR="$tmp/state" bash scripts/bc250-cpu-health.sh rearm status)"
+          grep -q 'Deep safety gate    : PASS' <<<"$out"
+          grep -q 'disabled (default)' <<<"$out"
+
       - name: ShellCheck
         run: |
           sudo apt-get update

@@ -10,6 +10,9 @@ verify_commit="$(git -C "$BC250_ROOT/upstream/bc250-40cu-unlock" rev-parse HEAD 
 mesa_ver="$(pacman -Q mesa 2>/dev/null || echo unknown)"
 current="$(current_routed_cus 2>/dev/null || echo unknown)"
 temp="$(max_amdgpu_temp_c 2>/dev/null || echo unknown)"
+cpu_results="$STATE_DIR/cpu-results.tsv"
+cpu_threads="$(nproc 2>/dev/null || echo unknown)"
+if systemctl is-enabled --quiet bc250-cpu-rearm.service 2>/dev/null; then cpu_rearm="enabled"; else cpu_rearm="disabled"; fi
 {
   echo '# BC-250 CU Unlock Suite report'
   echo
@@ -24,6 +27,8 @@ temp="$(max_amdgpu_temp_c 2>/dev/null || echo unknown)"
   printf -- '- Mesa: `%s`\n' "$mesa_ver"
   printf -- '- Current routed CUs: `%s/40`\n' "$current"
   printf -- '- Current max amdgpu hwmon temp: `%s C`\n' "$temp"
+  printf -- '- CPU online threads: `%s`\n' "$cpu_threads"
+  printf -- '- CPU automatic re-arm: `%s`\n' "$cpu_rearm"
   printf -- '- live-manager commit: `%s`\n' "$manager_commit"
   printf -- '- 40cu/verifier commit: `%s`\n' "$verify_commit"
   echo
@@ -68,6 +73,20 @@ temp="$(max_amdgpu_temp_c 2>/dev/null || echo unknown)"
   mapfile -t good < <(approved_wgps 2>/dev/null || true)
   printf -- '- Approved WGPs: `%s`\n' "${good[*]:-none}"
   printf -- '- Nominal target: `%s/40 CUs`\n' "$((24 + 2*${#good[@]}))"
+  echo
+  echo '## CPU validation'
+  echo
+  printf -- '- Current online threads: `%s`\n' "$cpu_threads"
+  printf -- '- Automatic re-arm: `%s`\n' "$cpu_rearm"
+  if [ -s "$cpu_results" ]; then
+    echo
+    echo '| Time | Stage | Status | Detail | Log |'
+    echo '|---|---|---|---|---|'
+    tail -n 20 "$cpu_results" | awk -F'\t' '{printf "| %s | `%s` | %s | %s | `%s` |\n",$1,$2,$3,$4,$5}'
+  else
+    echo
+    echo 'No CPU health-test records.'
+  fi
   echo
   echo '## Notes'
   echo

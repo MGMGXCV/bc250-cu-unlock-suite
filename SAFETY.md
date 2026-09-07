@@ -2,7 +2,9 @@
 
 BC-250 CU Unlock Suite is an **experimental hardware research tool**. It can write
 low-level AMDGPU routing registers and can intentionally expose factory-disabled
-GPU WGPs. Some disabled WGPs may be defective.
+GPU WGPs. Some disabled WGPs may be defective. The suite can also request the
+known volatile BC-250 CPU core-presence unlock (6c/12t -> 8c/16t) through the
+fetched live-manager; factory-disabled CPU cores may also be defective.
 
 ## Use responsibly
 
@@ -13,7 +15,9 @@ By running hardware-changing actions, you accept that testing may:
 - lose unsaved work;
 - increase power draw and temperature;
 - require a reboot or a return to the factory 24-CU routing;
-- reveal instability that synthetic tests do not catch.
+- reveal instability that synthetic tests do not catch;
+- expose two factory-disabled CPU cores that may fail under load;
+- require a full cold power cycle to return CPU enumeration to stock 6c/12t.
 
 Before testing:
 
@@ -26,8 +30,13 @@ Before testing:
    the physical board in front of you.
 6. Treat visible corruption as a failure even if an automated verifier says
    `PASS`.
-7. Do not install boot persistence until the combined profile has passed
+7. Do not install GPU boot persistence until the combined profile has passed
    compute, visual, real-workload and soak testing.
+8. Do not enable automatic CPU re-arm until `cpu deep` passes for physical cores
+   3 and 7 plus the all-thread stage, and real workloads have also been tested.
+9. Automatic CPU re-arm is advanced and off by default. It never reboots the
+   machine automatically; after a cold boot you still choose a warm reboot before
+   8c/16t becomes active.
 
 The project includes safety gates and rollback helpers, but **no test can prove
 that a harvested WGP is healthy under every possible workload**.

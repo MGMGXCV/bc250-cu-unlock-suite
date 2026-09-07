@@ -28,6 +28,11 @@ jobs:
           python3 -m py_compile scripts/bc250-graphics-verify.py gui/bc250_gui.py
           python3 gui/bc250_gui.py --self-test
           node --check gui/app.js
+          tmp="$(mktemp -d)"
+          mkdir -p "$tmp/state"
+          printf '2026-09-06T13:23:08+02:00\tcore3\tPASS\tok\t/tmp/logs/cpu-deep-test.log\n2026-09-06T13:28:08+02:00\tcore7\tPASS\tok\t/tmp/logs/cpu-deep-test.log\n2026-09-06T13:38:08+02:00\tALL\tPASS\tok\t/tmp/logs/cpu-deep-test.log\n' > "$tmp/state/cpu-results.tsv"
+          out="$(sudo env BC250_PLATFORM=cachyos BC250_STATE_DIR="$tmp/state" bash scripts/bc250-cpu-health.sh rearm status)"
+          grep -q 'Deep safety gate    : PASS' <<<"$out"
       - name: Build source archives
         shell: bash
         run: |

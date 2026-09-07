@@ -42,6 +42,14 @@
         <span data-i18n="persistence">Boot persistence</span>
         <strong id="persist-value">…</strong>
       </article>
+      <article class="status-card">
+        <span data-i18n="cpuStatus">CPU</span>
+        <strong id="cpu-value">—</strong>
+      </article>
+      <article class="status-card">
+        <span data-i18n="cpuRearm">CPU re-arm</span>
+        <strong id="cpu-rearm-value">…</strong>
+      </article>
     </section>
 
     <section id="persistent-mode-notice" class="notice success" hidden>
@@ -49,6 +57,37 @@
       <div>
         <strong data-i18n="configuredTitle">Persistent profile active — protected mode</strong>
         <p data-i18n="configuredBody">Your saved WGP profile is already restored at boot. Diagnostic tests are disabled to avoid mixing live probing with boot persistence. Status, results, reports and persistence management remain available.</p>
+      </div>
+    </section>
+
+    <section class="platform-section cpu-section">
+      <div class="section-heading compact">
+        <div>
+          <div class="eyebrow" data-i18n="cpuSection">CPU UNLOCK</div>
+          <h2 data-i18n="cpuTitle">CPU unlock 6c/12t → 8c/16t</h2>
+        </div>
+        <p data-i18n="cpuBody">Hardware-validated on the reference board. The unlock is volatile and needs a warm reboot before all 8 cores are enumerated.</p>
+      </div>
+      <div class="tool-grid">
+        <button class="tool-card action" data-action="cpu_status"><strong data-i18n="cpuStatusTitle">CPU status</strong><span data-i18n="cpuStatusBody">Show present threads, health-test results and re-arm state.</span></button>
+        <button class="tool-card action" data-action="cpu_unlock" data-risk="cpu"><strong data-i18n="cpuUnlockTitle">Unlock 8c/16t</strong><span data-i18n="cpuUnlockBody">Arm the known 0x77 → 0xFF mask. Warm reboot when ready.</span></button>
+        <button class="tool-card action" data-action="cpu_quick" data-risk="cpu"><strong data-i18n="cpuQuickTitle">Quick test</strong><span data-i18n="cpuQuickBody">Tests physical cores 3 and 7, then all threads.</span></button>
+        <button class="tool-card action" data-action="cpu_deep" data-risk="cpu"><strong data-i18n="cpuDeepTitle">Deep test</strong><span data-i18n="cpuDeepBody">5 min per hidden core + 10 min all threads. Required before automatic re-arm.</span></button>
+      </div>
+      <div class="cpu-advanced">
+        <div>
+          <div class="eyebrow" data-i18n="cpuAdvanced">ADVANCED</div>
+          <h3 data-i18n="cpuRearmTitle">Automatic re-arm after a cold boot</h3>
+          <p data-i18n="cpuRearmBody">Off by default. It saves the manual unlock step after a cold boot, but you still choose a warm reboot before 8c/16t becomes active. It never reboots automatically.</p>
+        </div>
+        <div class="cpu-rearm-controls">
+          <label class="switch-control">
+            <input type="checkbox" id="cpu-rearm-toggle">
+            <span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span>
+            <span data-i18n="cpuRearmToggle">Enable automatic re-arm</span>
+          </label>
+          <button class="button secondary action" data-action="cpu_rearm_status" data-i18n="cpuRearmStatus">View re-arm status</button>
+        </div>
       </div>
     </section>
 

@@ -2,7 +2,7 @@
 
 **Descubre. Prueba. Desbloquea.**
 
-Pruebas experimentales y reversibles de CUs/WGPs y desbloqueo selectivo para AMD BC-250 en Linux.
+Pruebas experimentales y reversibles de CUs/WGPs de GPU y desbloqueo validado de CPU 6c/12t -> 8c/16t para AMD BC-250 en Linux.
 
 [English README](README.md)
 
@@ -117,9 +117,14 @@ sudo ./bc250-unlock stock
 sudo ./bc250-unlock recover
 sudo ./bc250-unlock soak 30
 sudo ./bc250-unlock report
+sudo ./bc250-unlock cpu status
+sudo ./bc250-unlock cpu unlock
+sudo ./bc250-unlock cpu quick
+sudo ./bc250-unlock cpu deep
+sudo ./bc250-unlock cpu rearm status
 ```
 
-Persistencia, únicamente tras pruebas reales y soak limpios:
+Persistencia GPU, únicamente tras pruebas reales y soak limpios:
 
 ```bash
 sudo ./bc250-unlock persist status
@@ -134,6 +139,50 @@ sudo ./bc250-unlock persist remove
 
 La persistencia no modifica BIOS/firmware. Guarda el routing validado para **esa
 placa concreta** y lo reaplica mediante el mecanismo systemd del live-manager.
+
+## Desbloqueo de CPU — 6c/12t a 8c/16t
+
+Desde v0.5.0 el desbloqueo de CPU deja de estar escondido como helper de
+investigación y pasa a ser una función documentada de primer nivel. Sigue siendo
+independiente del desbloqueo de CUs de GPU.
+
+```bash
+sudo ./bc250-unlock cpu status
+sudo ./bc250-unlock cpu unlock
+# reinicio en caliente cuando quieras activarlo, después:
+sudo ./bc250-unlock cpu quick
+sudo ./bc250-unlock cpu deep
+```
+
+La suite delega la operación volátil conocida `0x77 -> 0xFF` al
+`bc250-cu-live-manager` descargado durante el setup. Tras un corte completo de
+corriente la CPU vuelve a 6c/12t; después de armar el unlock, un reinicio en
+caliente permite enumerar 8c/16t. El helper nunca reinicia el equipo
+automáticamente.
+
+### Re-arm automático avanzado
+
+El re-arm está **desactivado por defecto** y sólo puede activarse después de un
+`cpu deep` completo con PASS en los cores físicos 3 y 7 y en la prueba de todos
+los hilos.
+
+```bash
+sudo ./bc250-unlock cpu rearm status
+sudo ./bc250-unlock cpu rearm enable
+sudo ./bc250-unlock cpu rearm disable
+```
+
+El re-arm **no elimina el reinicio necesario**. Después de un arranque en frío,
+Linux entra en 6c/12t, el servicio rearma automáticamente la máscara y evita que
+tengas que ejecutar `cpu unlock` a mano. La sesión actual sigue en 6c/12t hasta
+que **tú decidas hacer un warm reboot**. La suite nunca reinicia sola.
+
+El flujo de v0.5.0 se ha validado en la placa de desarrollo con quick/deep,
+juegos reales, recuperación mediante corte completo de corriente y un nuevo
+desbloqueo posterior. Es evidencia de una placa concreta, no una garantía para
+todas las BC-250.
+
+Más detalle: [docs/CPU.md](docs/CPU.md).
 
 ## Por qué existe la comprobación visual
 

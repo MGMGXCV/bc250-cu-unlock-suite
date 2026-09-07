@@ -21,10 +21,10 @@ bc250 amd amdgpu rdna2 linux cachyos archlinux steamos gpu reverse-engineering
 After extracting the source archive:
 
 ```bash
-cd bc250-cu-unlock-suite-v0.4.0
+cd bc250-cu-unlock-suite-v0.5.0
 git init
 git add .
-git commit -m "BC-250 CU Unlock Suite v0.4.0"
+git commit -m "BC-250 CU Unlock Suite v0.5.0"
 git branch -M main
 ```
 
@@ -49,11 +49,11 @@ matching the `VERSION` file automatically:
 3. creates `RELEASE-CHECKSUMS.sha256`;
 4. publishes a GitHub Release using `RELEASE_NOTES.md`.
 
-For v0.4.0:
+For v0.5.0:
 
 ```bash
-git tag -a v0.4.0 -m "BC-250 CU Unlock Suite v0.4.0"
-git push origin v0.4.0
+git tag -a v0.5.0 -m "BC-250 CU Unlock Suite v0.5.0"
+git push origin v0.5.0
 ```
 
 The tag must match `VERSION` or the release workflow intentionally fails.
@@ -104,4 +104,5 @@ Also test at least:
 - GUI launch as a non-root desktop user;
 - one terminal launch from the GUI;
 - application-menu shortcut install/remove;
-- `doctor` and `status` on a real BC-250 before tagging a release.
+- `doctor` and `status` on a real BC-250 before tagging a release;
+- `cpu status`, `cpu quick`, `cpu deep`, and CPU re-arm status on validated hardware for CPU-feature releases.

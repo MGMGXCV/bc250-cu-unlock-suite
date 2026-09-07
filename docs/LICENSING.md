@@ -50,8 +50,8 @@ Important current cases:
 
 - `duggasco/bc250-40cu-unlock` advertises GPL-2.0; its verifier remains GPL-2.0.
 - `WinnieLV/bc250-cu-live-manager` did not advertise an explicit license when
-  this release was reviewed. Do not bundle/redistribute its source in BC-250 WGP
-  Suite releases unless the upstream licensing situation permits it.
+  this release was reviewed. Do not bundle/redistribute its source in BC-250 CU Unlock Suite
+  releases unless the upstream licensing situation permits it.
 
 See [../THIRD_PARTY.md](../THIRD_PARTY.md) and
 [REFERENCES.md](REFERENCES.md).

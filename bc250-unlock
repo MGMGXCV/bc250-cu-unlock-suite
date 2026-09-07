@@ -44,11 +44,19 @@ Commands:
   gui [--no-browser]     Optional bilingual graphical guide (run WITHOUT sudo)
   gui-shortcut install   Add the graphical guide to your desktop application menu
 
+CPU core unlock:
+  cpu status             Show 6c/12t or 8c/16t state + test/re-arm status
+  cpu unlock             Arm volatile 6c/12t -> 8c/16t unlock (warm reboot required)
+  cpu quick              Quick health test of hidden cores 3/7 + all threads
+  cpu deep               Deep health test; required before automatic re-arm
+  cpu rearm status       Show advanced automatic re-arm state
+  cpu rearm enable       Enable advanced cold-boot re-arm (OFF by default)
+  cpu rearm disable      Disable automatic re-arm
+
 Experimental/optional:
   gfx baseline|scan|test WGP   Offscreen graphics readback verifier
-  cpu status|unlock|quick|deep CPU-core research helper
 
-Safety: persistence is board-specific. Never copy another board's WGP profile.
+Safety: GPU persistence is board-specific. CPU re-arm is advanced, OFF by default, and requires a deep PASS.
 USAGE
 }
 need_root(){ [ "${EUID:-$(id -u)}" -eq 0 ] || { echo '[bc250-unlock] ERROR: run with sudo' >&2; exit 1; }; }
