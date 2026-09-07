@@ -4,7 +4,7 @@ This file records the main public sources used to design, verify or contextualiz
 BC-250 CU Unlock Suite. The project links to/fetches upstream tools rather than claiming
 their work as its own.
 
-Last reviewed: **2026-09-06**.
+Last reviewed: **2026-09-07**.
 
 ## Core BC-250 GPU work
 
@@ -33,7 +33,8 @@ Used at runtime for:
 - live WGP routing through UMR;
 - the status/dashboard representation;
 - returning to stock routing;
-- saving/applying a selected boot table through systemd.
+- saving/applying a selected boot table through systemd;
+- the volatile CPU core-presence unlock used by the suite's 6c/12t -> 8c/16t workflow and advanced re-arm service.
 
 At the time this release was prepared, the repository did not advertise an
 explicit software license in its repository metadata/README. BC-250 CU Unlock Suite

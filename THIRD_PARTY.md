@@ -4,7 +4,7 @@ BC-250 CU Unlock Suite intentionally does **not** vendor the upstream register m
 compute-verifier repository in release archives. `setup.sh` fetches them into
 `./upstream/` so their source, history and licensing remain separate.
 
-Last reviewed: **2026-09-06**.
+Last reviewed: **2026-09-07**.
 
 ## Runtime upstream dependencies
 
@@ -13,7 +13,11 @@ Last reviewed: **2026-09-06**.
 https://github.com/WinnieLV/bc250-cu-live-manager
 
 Used for live WGP routing, status/dashboard output, UMR integration, stock
-restore and optional boot-table persistence.
+restore, optional boot-table persistence, and the known volatile BC-250 CPU
+core-presence unlock used by `cpu unlock` / advanced CPU re-arm. When CPU re-arm
+is enabled, the suite installs a local runtime copy of the already-fetched
+live-manager on that machine so systemd does not depend on the checkout path.
+That copy is created locally at enable time and is not included in release archives.
 
 At the time of this review, the repository did not advertise an explicit
 software license in its repository metadata/README. BC-250 CU Unlock Suite therefore

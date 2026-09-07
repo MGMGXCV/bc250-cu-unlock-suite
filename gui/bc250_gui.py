@@ -33,6 +33,7 @@ VERSION_FILE = ROOT / "VERSION"
 UPSTREAM_MANAGER = ROOT / "upstream" / "bc250-cu-live-manager" / "bc250-cu-live-manager.sh"
 UPSTREAM_VERIFY = ROOT / "upstream" / "bc250-40cu-unlock" / "scripts" / "bc250-compute-verify.sh"
 SERVICE = "bc250-cu-live-manager.service"
+CPU_REARM_SERVICE = "bc250-cpu-rearm.service"
 
 # When boot persistence is enabled, probing commands intentionally refuse to run.
 # Mirror that safety rule in the GUI so beginners are not led into expected errors.
@@ -62,6 +63,13 @@ ACTIONS: dict[str, dict[str, Any]] = {
     "persist_reapply": {"cmd": "sudo bash ./bc250-unlock persist reapply", "group": "persist", "risk": "write"},
     "steamos_verify": {"cmd": "sudo bash ./bc250-unlock steamos verify", "group": "steamos", "risk": "normal"},
     "steamos_repair": {"cmd": "sudo bash ./bc250-unlock steamos repair", "group": "steamos", "risk": "system"},
+    "cpu_status": {"cmd": "sudo bash ./bc250-unlock cpu status", "group": "cpu", "risk": "normal"},
+    "cpu_unlock": {"cmd": "sudo bash ./bc250-unlock cpu unlock", "group": "cpu", "risk": "cpu"},
+    "cpu_quick": {"cmd": "sudo bash ./bc250-unlock cpu quick", "group": "cpu", "risk": "cpu"},
+    "cpu_deep": {"cmd": "sudo bash ./bc250-unlock cpu deep", "group": "cpu", "risk": "cpu"},
+    "cpu_rearm_status": {"cmd": "sudo bash ./bc250-unlock cpu rearm status", "group": "cpu", "risk": "normal"},
+    "cpu_rearm_enable": {"cmd": "sudo bash ./bc250-unlock cpu rearm enable", "group": "cpu", "risk": "cpu_rearm"},
+    "cpu_rearm_disable": {"cmd": "sudo bash ./bc250-unlock cpu rearm disable", "group": "cpu", "risk": "cpu_rearm"},
 }
 
 
@@ -237,6 +245,31 @@ def service_enabled() -> bool | None:
     return False
 
 
+def cpu_rearm_enabled() -> bool | None:
+    if not shutil.which("systemctl"):
+        return None
+    rc, _ = run_capture(["systemctl", "is-enabled", "--quiet", CPU_REARM_SERVICE], timeout=2.0)
+    return rc == 0
+
+
+def cpu_present_threads() -> int | None:
+    try:
+        text = Path("/sys/devices/system/cpu/present").read_text(encoding="ascii").strip()
+    except OSError:
+        return None
+    total = 0
+    try:
+        for part in text.split(","):
+            if "-" in part:
+                lo, hi = part.split("-", 1)
+                total += int(hi) - int(lo) + 1
+            elif part:
+                total += 1
+    except ValueError:
+        return None
+    return total
+
+
 def action_block_reason(action_id: str) -> str | None:
     """Return a stable reason when the GUI must not launch an action."""
     if action_id in PERSISTENCE_LOCKED_ACTIONS and service_enabled() is True:
@@ -254,13 +287,15 @@ def info_payload() -> dict[str, Any]:
         "terminal": term_name,
         "liveCUs": sudo_cached_live_cus(),
         "serviceEnabled": persisted,
+        "cpuThreads": cpu_present_threads(),
+        "cpuRearmEnabled": cpu_rearm_enabled(),
         "mode": "persistent" if persisted is True else "diagnostic",
         "root": str(ROOT),
     }
 
 
 class GuiHandler(BaseHTTPRequestHandler):
-    server_version = "BC250Gui/0.4.0"
+    server_version = "BC250Gui/0.5.0"
 
     def log_message(self, fmt: str, *args: Any) -> None:
         if getattr(self.server, "verbose", False):
@@ -365,7 +400,7 @@ class GuiHandler(BaseHTTPRequestHandler):
 def self_test() -> int:
     required = [GUI_DIR / "index.html", GUI_DIR / "style.css", GUI_DIR / "app.js", ROOT / "bc250-unlock"]
     missing = [str(p) for p in required if not p.is_file()]
-    bad = [k for k, v in ACTIONS.items() if not v.get("cmd") or v.get("risk") not in {"normal", "write", "persist", "system"}]
+    bad = [k for k, v in ACTIONS.items() if not v.get("cmd") or v.get("risk") not in {"normal", "write", "persist", "system", "cpu", "cpu_rearm"}]
     bad_locked = sorted(PERSISTENCE_LOCKED_ACTIONS.difference(ACTIONS))
     if missing or bad or bad_locked:
         print(json.dumps({"ok": False, "missing": missing, "badActions": bad, "badPersistenceLocks": bad_locked}, indent=2))

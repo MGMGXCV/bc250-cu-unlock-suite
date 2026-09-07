@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0 — CPU unlock promoted + advanced automatic re-arm
+
+- Promoted CPU 6c/12t -> 8c/16t support from a hidden research helper to a documented first-class workflow.
+- Added main CLI help entries for `cpu status`, `unlock`, `quick`, `deep`, and `rearm`.
+- Added a dedicated bilingual GUI CPU section that remains available alongside a persistent GPU profile.
+- Added advanced automatic CPU re-arm, disabled by default.
+- Re-arm only saves the manual unlock step after a cold boot; a user-initiated warm reboot is still required before 8c/16t becomes active.
+- Re-arm never performs an automatic reboot.
+- Added a deep-test gate: automatic re-arm requires PASS for physical cores 3 and 7 plus the all-thread stage from one `cpu deep` run.
+- Added `docs/CPU.md` and expanded safety/documentation around cold-power recovery and CPU/GPU independence.
+- Hardware-validated the CPU workflow on the reference board with quick/deep PASS, real games, cold-power recovery and re-unlock.
+- No intentional changes to GPU WGP routing, compute/visual approval, combined validation, soak or GPU persistence gates.
+
 ## 0.4.0 — BC-250 CU Unlock Suite rebrand
 
 - Renamed the public project from **BC-250 WGP Lab** to **BC-250 CU Unlock Suite**.

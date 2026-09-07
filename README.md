@@ -2,7 +2,7 @@
 
 **Discover. Test. Unlock.**
 
-Experimental, reversible CU/WGP health testing and selective unlocking for the AMD BC-250 on Linux.
+Experimental, reversible GPU CU/WGP testing plus validated CPU 6c/12t -> 8c/16t unlocking for the AMD BC-250 on Linux.
 
 [Versión en español](README_ES.md)
 
@@ -18,7 +18,7 @@ approved set together, and only then offers optional boot persistence.
 
 Use this tool responsibly. Keep a recovery path, never copy another board's WGP
 profile, and do not install persistence until compute, visual, real-game and soak
-tests are clean. See [SAFETY.md](SAFETY.md).
+tests are clean. CPU unlocks must also be validated before automatic re-arm. See [SAFETY.md](SAFETY.md).
 
 > **AI assistance disclosure**
 > BC-250 CU Unlock Suite was developed with assistance from **OpenAI ChatGPT
@@ -114,7 +114,7 @@ The runtime results do not need copying when you stay on the same platform becau
 
 ## Optional graphical mode / Modo gráfico para usuarios menos experimentados
 
-The CLI remains the primary interface, and v0.4.0 includes an optional bilingual
+The CLI remains the primary interface. v0.4.0 introduced the optional bilingual
 **Español / English** graphical guide:
 
 ```bash
@@ -166,6 +166,11 @@ sudo ./bc250-unlock recover          # classify pending hang/interruption
 sudo ./bc250-unlock soak 30          # 30-minute combined compute soak
 sudo ./bc250-unlock report           # Markdown report for sharing/issues
 sudo ./bc250-unlock steamos verify   # SteamOS-only post-update health check
+sudo ./bc250-unlock cpu status       # CPU 6c/12t or 8c/16t status
+sudo ./bc250-unlock cpu unlock       # arm volatile CPU unlock; warm reboot required
+sudo ./bc250-unlock cpu quick        # quick hidden-core health test
+sudo ./bc250-unlock cpu deep         # deep hidden-core health test
+sudo ./bc250-unlock cpu rearm status # advanced automatic re-arm status
 ./bc250-unlock gui                    # optional bilingual graphical guide
 ```
 
@@ -282,20 +287,46 @@ It can detect some graphics faults automatically, but it is **not** a substitute
 for the visual gate: a known bad WGP during development passed offscreen readback
 while still corrupting the physical display.
 
-## CPU helper
+## CPU unlock — 6c/12t to 8c/16t
 
-GPU WGP testing and CPU-core unlocking are separate mechanisms. An optional CPU
-helper is included for research:
+From v0.5.0 the CPU workflow is a documented first-class feature rather than a
+hidden research helper. GPU WGP testing and CPU-core unlocking remain separate
+mechanisms: change one variable at a time.
 
 ```bash
 sudo ./bc250-unlock cpu status
 sudo ./bc250-unlock cpu unlock
-# warm reboot, then:
+# perform a warm reboot when ready, then:
 sudo ./bc250-unlock cpu quick
+sudo ./bc250-unlock cpu deep
 ```
 
-Do not mix CPU unlocking, GPU WGP discovery, overclocking, and undervolting in a
-single diagnostic step. Change one variable at a time.
+The suite delegates the known volatile `0x77 -> 0xFF` CPU-mask operation to the
+fetched `bc250-cu-live-manager`. A full cold power cycle returns CPU enumeration
+to stock 6c/12t; a warm reboot after a successful unlock brings up 8c/16t. The
+CPU helper itself never reboots automatically.
+
+### Advanced automatic CPU re-arm
+
+Automatic re-arm is **OFF by default** and requires a complete `cpu deep` PASS
+for physical cores 3 and 7 plus the all-thread stage.
+
+```bash
+sudo ./bc250-unlock cpu rearm status
+sudo ./bc250-unlock cpu rearm enable
+sudo ./bc250-unlock cpu rearm disable
+```
+
+Re-arm does **not** make 8c/16t appear immediately after a cold boot. It only
+saves you from manually running `cpu unlock`: Linux boots at 6c/12t, the service
+re-arms the mask, and **you still choose when to perform one warm reboot** to
+activate 8c/16t. The service never reboots the machine automatically.
+
+The v0.5.0 workflow has been hardware-validated on the reference development
+board through quick/deep tests, real games, cold-power recovery and a subsequent
+re-unlock. This remains board-specific evidence, not a guarantee.
+
+See [docs/CPU.md](docs/CPU.md).
 
 ## Upstream projects
 
@@ -316,6 +347,7 @@ See [THIRD_PARTY.md](THIRD_PARTY.md).
 ## Documentation
 
 - [Methodology and safety model](docs/METHODOLOGY.md)
+- [CPU unlock, validation and advanced re-arm](docs/CPU.md)
 - [Persistence and rollback](docs/PERSISTENCE.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Sharing results / reports](docs/REPORTS.md)

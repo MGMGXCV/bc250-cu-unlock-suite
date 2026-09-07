@@ -13,3 +13,15 @@ if [ -r "$TOPOLOGY" ]; then
   printf '[bc250-unlock] approved nominal target: %s/40 CUs\n' "$((24 + 2*${#good[@]}))"
 fi
 t="$(max_amdgpu_temp_c || true)"; [ -n "$t" ] && printf '[bc250-unlock] current maximum amdgpu temperature: %sC\n' "$t" || true
+printf '[bc250-unlock] CPU automatic re-arm: '
+if systemctl is-enabled --quiet bc250-cpu-rearm.service 2>/dev/null; then
+  if systemctl is-active --quiet bc250-cpu-rearm.service 2>/dev/null; then
+    printf 'ENABLED (service completed this boot; warm reboot may still be required after a cold boot)\n'
+  elif systemctl is-failed --quiet bc250-cpu-rearm.service 2>/dev/null; then
+    printf 'ENABLED but FAILED (journalctl -u bc250-cpu-rearm.service -b)\n'
+  else
+    printf 'ENABLED\n'
+  fi
+else
+  printf 'disabled (default)\n'
+fi

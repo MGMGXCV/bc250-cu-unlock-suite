@@ -25,6 +25,25 @@ tested.
 If the visual/compute result set changes, rerun `sudo ./bc250-unlock apply` before
 persistence.
 
+## GPU persistence vs CPU re-arm
+
+This document mainly describes **GPU WGP boot persistence**. v0.5.0 also offers
+an advanced CPU **re-arm** service, but it is intentionally named differently:
+
+```bash
+sudo ./bc250-unlock cpu rearm status
+sudo ./bc250-unlock cpu rearm enable
+sudo ./bc250-unlock cpu rearm disable
+```
+
+CPU re-arm is OFF by default and requires a complete `cpu deep` PASS. It does not
+make 8c/16t survive a full cold power cycle in the same way the GPU table survives
+a reboot. After a cold boot Linux still starts at 6c/12t; the service only re-arms
+the volatile CPU mask so the user can choose a subsequent **warm reboot** to
+activate 8c/16t. The service never performs that reboot automatically.
+
+See [CPU.md](CPU.md).
+
 ## How persistence is implemented
 
 The wrapper does not invent another register-writing boot service. It uses the

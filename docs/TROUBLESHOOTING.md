@@ -91,3 +91,50 @@ That is expected behavior for packages added to the atomic root image. Use
 SteamOS's normal OS updater for the operating system itself; do not use
 `pacman -Syu` to turn SteamOS into ordinary rolling Arch. Re-run
 `sudo ./bc250-unlock steamos repair` when the suite reports missing host dependencies.
+
+## CPU is back to 6c/12t after power was removed
+
+That is expected. The CPU core-presence unlock is volatile. Check:
+
+```bash
+sudo ./bc250-unlock cpu status
+```
+
+With automatic re-arm disabled, run `cpu unlock` again and then choose a warm
+reboot. With automatic re-arm enabled, check:
+
+```bash
+sudo ./bc250-unlock cpu rearm status
+```
+
+If it says the unlock was re-armed this boot, the current session will still be
+6c/12t until you perform a warm reboot. The re-arm service never reboots the
+machine automatically.
+
+## `cpu rearm enable` refuses because the deep safety gate is missing
+
+Run the full validation while 8c/16t is active:
+
+```bash
+sudo ./bc250-unlock cpu deep
+```
+
+Re-arm requires PASS records for physical cores 3 and 7 plus the all-thread stage
+from the same deep-test log. This gate is intentional and should not be bypassed.
+
+## CPU re-arm service failed
+
+Inspect the current boot:
+
+```bash
+sudo systemctl status bc250-cpu-rearm.service
+sudo journalctl -u bc250-cpu-rearm.service -b
+```
+
+Do not add an automatic reboot workaround. If the 8-core state itself is unstable,
+perform a full cold power cycle to return CPU enumeration to stock 6c/12t, then
+disable re-arm:
+
+```bash
+sudo ./bc250-unlock cpu rearm disable
+```

@@ -32,11 +32,13 @@ Internet.
 La pantalla ofrece:
 
 - selector Español / English;
-- estado básico de plataforma, setup y persistencia;
+- estado básico de plataforma, setup, GPU, CPU y persistencia;
 - asistente completo recomendado;
 - flujo paso a paso: doctor → baseline → compute → visual → combinado → soak →
   persistencia;
 - herramientas de estado, report, recuperación y vuelta a stock;
+- sección CPU visible con estado 6c/12t vs 8c/16t, unlock, quick y deep;
+- control avanzado de re-arm automático de CPU, desactivado por defecto y con aviso explícito de que todavía requiere un warm reboot;
 - botones SteamOS Verify / Repair sólo cuando se detecta SteamOS;
 - advertencias adicionales antes de acciones que escriben routing o persistencia;
 - terminal visible para cada comando;
@@ -104,11 +106,13 @@ It opens a local interface in the default browser. The server binds only to
 The UI provides:
 
 - Español / English selector;
-- basic platform, setup and persistence status;
+- basic platform, setup, GPU, CPU and persistence status;
 - recommended full wizard;
 - step-by-step doctor → baseline → compute → visual → combined → soak →
   persistence flow;
 - status, report, recovery and stock-restore tools;
+- first-class CPU section with 6c/12t vs 8c/16t status, unlock, quick and deep actions;
+- advanced automatic CPU re-arm control, off by default, with an explicit warning that a user-initiated warm reboot is still required;
 - SteamOS Verify / Repair buttons only on SteamOS;
 - extra confirmations before routing/persistence actions;
 - a visible terminal for every CLI command;
@@ -134,12 +138,27 @@ its absolute path is refreshed.
 ### Safety architecture
 
 The browser can only request predefined action IDs such as `baseline`, `scan`,
-`visual`, `stock` or `persist_install`. The backend maps those IDs to fixed CLI
+`visual`, `stock`, `cpu_unlock`, `cpu_deep` or `persist_install`. The backend maps those IDs to fixed CLI
 commands. There is deliberately no endpoint that executes arbitrary shell text.
 
 The server uses a random per-session token and binds only to localhost.
 Privileged actions continue to request the user's password through normal `sudo`
 inside the visible terminal.
+
+## CPU actions and automatic re-arm
+
+The CPU section is intentionally independent from GPU protected mode. A user may
+keep a validated persistent GPU WGP profile active while checking or validating
+the CPU unlock.
+
+The automatic CPU re-arm switch is an advanced control and is OFF by default.
+Turning it on launches the canonical CLI command in a visible terminal, where the
+deep-PASS gate and final confirmation are enforced. The switch never causes an
+automatic reboot. After a true cold boot the current session still starts at
+6c/12t; the service only re-arms the mask so the user can choose a later warm
+reboot to activate 8c/16t.
+
+See [CPU.md](CPU.md).
 
 ## Headless / browser-control options
 
