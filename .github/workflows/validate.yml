@@ -17,6 +17,15 @@ jobs:
         run: python3 gui/bc250_gui.py --self-test
       - name: JavaScript syntax
         run: node --check gui/app.js
+      - name: Check checksum manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp)"
+          while read -r _ path; do
+            sha256sum "$path"
+          done < CHECKSUMS.sha256 > "$tmp"
+          diff -u CHECKSUMS.sha256 "$tmp"
       - name: GUI readability / attribution smoke test
         run: |
           grep -q '^\.persistence-locked { opacity: 1; }' gui/style.css
