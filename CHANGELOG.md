@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.1 — GUI persisted-CU status fallback
+
+- GUI status now keeps the existing live CU query as the preferred source.
+- When live UMR status cannot be read because no cached/passwordless sudo session is available, the GUI can fall back to the saved boot profile in `/etc/bc250-cu-live-manager.conf`.
+- The fallback is only used when `bc250-cu-live-manager.service` is both enabled and active.
+- The saved `BC250_WGP_MASKS` table is parsed read-only and converted to a CU count without adding GUI privileges, passwordless sudo, or GPU register writes.
+- Hardware-validated on the reference board with masks `0x1f,0x07,0x1f,0x1d`, where the Plasma launcher now reports `34/40` instead of an unavailable dash.
+- No changes to GPU unlock/routing, CPU unlock/re-arm, validation gates, or persistence behavior.
+
 ## 0.5.0 — CPU unlock promoted + advanced automatic re-arm
 
 - Promoted CPU 6c/12t -> 8c/16t support from a hidden research helper to a documented first-class workflow.
