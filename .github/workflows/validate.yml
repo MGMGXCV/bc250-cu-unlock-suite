@@ -89,7 +89,7 @@ jobs:
           2026-09-06T13:28:08+02:00	core7	PASS	ok	/tmp/logs/cpu-deep-test.log
           2026-09-06T13:38:08+02:00	ALL	PASS	ok	/tmp/logs/cpu-deep-test.log
           CPU
-          out="$(BC250_PLATFORM=cachyos BC250_STATE_DIR="$tmp/state" bash scripts/bc250-cpu-health.sh rearm status)"
+          out="$(sudo env BC250_PLATFORM=cachyos BC250_STATE_DIR="$tmp/state" bash scripts/bc250-cpu-health.sh rearm status)"
           grep -q 'Deep safety gate    : PASS' <<<"$out"
           grep -q 'disabled (default)' <<<"$out"
 

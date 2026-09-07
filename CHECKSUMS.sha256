@@ -1,7 +1,7 @@
 6c85d242d0a7fddf0786fb3fdb8b31bfd896313138359ef549fb2990c216db7f  ./.github/ISSUE_TEMPLATE/bug_report.yml
 823d911820168015eb3b4a821c3eab6ecede74434182efca3b657b887463cf19  ./.github/ISSUE_TEMPLATE/hardware_result.yml
-9bd1d2f53c4da9792c4d44f6b3fc84890189660ddc21b63bef88c8cea99c450d  ./.github/workflows/release.yml
-7d7862fffb42e2410343f0dd81aabfb0e8733835d17813387400774712274e2d  ./.github/workflows/validate.yml
+ea1ddf4047d596ff7cad334c9fdcaa092f6d7e0a51a0b90ddbf1ecae6dd7ea10  ./.github/workflows/release.yml
+468c4641d44f0ac1e6a0f200294fd72f80ff616c5ce7421400fb8c398f0730a6  ./.github/workflows/validate.yml
 b3365db3ce6c391493c1a6a6c5ecaaf98ba85144633eaf180c827254ab90b19f  ./.gitignore
 1814cee9aef918e01b166d8a94392d66caa77acceac89a39591a91f19c48cfda  ./ACKNOWLEDGEMENTS.md
 2d3e20c3ae77d2163c379d53fc3f8db3a63812eb4fdb95917f39914c862a0597  ./CHANGELOG.md
